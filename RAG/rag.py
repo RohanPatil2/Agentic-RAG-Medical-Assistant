@@ -19,10 +19,10 @@ from langgraph.graph import END, StateGraph
 class RAG_chatbot:
     def __init__(self):
         # Initialize the LLaMA model
-        self.llm = OllamaLLM(model="hf.co/sathvik123/llama3-ChatDoc")
+        self.llm = OllamaLLM(model="hf.co/sRohanpatil02/llama3-ChatDoc")
 
         # for agent
-        groq_key = "Groq_KEY"
+        groq_key = "Groq-Key"
         self.groq_llm=ChatGroq(groq_api_key=groq_key, model_name="Gemma2-9b-It")
 
         api_wrapper=WikipediaAPIWrapper(top_k_results=1,doc_content_chars_max=1500)

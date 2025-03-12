@@ -1,177 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb7ie1o+7FZfyypKJ6JrUe5h2v2moenAcI3BQ"
-        crossorigin="anonymous">
-    <style>
-        /* General body styles */
-        body {
-            background-color: #f8f9fa;
-            height: 100vh;
-            margin: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChatGPT-Style Dark Mode Chat</title>
 
-        /* Main Chat container occupies 75% of screen */
-        .chat-container {
-            max-width: 80%;
-            height: 90%;
-            background: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 2.5% auto 0;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb7ie1o+7FZfyypKJ6JrUe5h2v2moenAcI3BQ"
+    crossorigin="anonymous"
+  />
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
 
-        /* Chat history area */
-        .chat-history {
-            height: 80%;
-            overflow-y: auto;
-            border: 1px solid #ced4da;
-            padding: 10px;
-            border-radius: 5px;
-            background: #e9ecef;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-        }
+  <style>
+    /* Body & Basic Reset */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #343541; /* Dark background akin to ChatGPT */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #fff;
+      overflow: hidden; /* We'll handle scrolling in dedicated areas */
+    }
 
-        /* Style for user messages */
-        .user-message,
-        .bot-message {
-            padding: 8px 10px;
-            margin: 5px 0;
-            border: 1px solid #495057;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
+    /* Main container: flex layout with sidebar + chat area */
+    .app-container {
+      display: flex;
+      height: 100%;
+      width: 100%;
+    }
 
-        /* Distinct styles for user vs bot messages */
-        .user-message {
-            text-align: right;
-            background-color: #d1ecff;
-            color: #004085;
-        }
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background-color: #202123;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .sidebar-header h2 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    .new-chat-btn {
+      width: 100%;
+      background-color: #3e3f4b;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      text-align: left;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .new-chat-btn:hover {
+      background-color: #4e4f5d;
+    }
+    .sidebar-item {
+      background-color: transparent;
+      border: none;
+      color: #ffffffcc;
+      text-align: left;
+      padding: 10px;
+      width: 100%;
+      font-size: 0.95rem;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+    .sidebar-item:hover {
+      background-color: #3e3f4b;
+      color: #fff;
+    }
 
-        .bot-message {
-            text-align: left;
-            background-color: #e2e3e5;
-            color: #383d41;
-        }
+    /* CHAT AREA */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #444654;
+      height: 100%;
+      max-height: 100%;
+      overflow: hidden;
+    }
 
-        /* Input group for responsive widths */
-        .input-group {
-            width: 100%;
-            margin-bottom: 0;
-        }
+    /* PROMPT BAR (top area with "chips") */
+    .prompt-bar {
+      padding: 15px 20px;
+      border-bottom: 1px solid #565869;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background-color: #343541;
+    }
+    .prompt-chip {
+      background-color: #3e3f4b;
+      color: #fff;
+      border-radius: 20px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.2s ease;
+    }
+    .prompt-chip:hover {
+      background-color: #4e4f5d;
+    }
 
-        /* Adjust input and button widths */
-        #user-query {
-            width: 80%;
-            border-radius: 5px 0 0 5px;
-            box-sizing: border-box;
-            padding: 10px;
-        }
+    /* MESSAGES SCROLL AREA */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .chat-messages::-webkit-scrollbar {
+      width: 8px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: #2f3036;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background-color: #5e5e67;
+      border-radius: 4px;
+    }
 
-        #send-btn {
-            width: 10%;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 0 5px 5px 0;
-            box-sizing: border-box;
-            padding: 10px;
-            cursor: pointer;
-        }
+    /* INDIVIDUAL MESSAGE */
+    .message-container {
+      display: flex;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    .message-avatar {
+      margin-right: 10px;
+    }
+    .message-avatar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .message-bubble {
+      max-width: 75%;
+      border-radius: 8px;
+      padding: 12px 16px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 0.95rem;
+    }
+    /* Bot message bubble */
+    .bot .message-bubble {
+      background-color: #40414f;
+      color: #f2f2f2;
+      border-bottom-left-radius: 0;
+    }
+    /* User message bubble */
+    .user {
+      flex-direction: row-reverse;
+    }
+    .user .message-bubble {
+      background-color: #0b57d0;
+      color: #ffffff;
+      border-bottom-right-radius: 0;
+    }
+    .user .message-avatar {
+      margin-left: 10px;
+      margin-right: 0;
+    }
 
-        #send-btn:hover {
-            background-color: #0056b3;
-        }
+    /* CHAT INPUT (centered horizontally with a wide text area) */
+    .chat-input {
+      background-color: #343541;
+      border-top: 1px solid #565869;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .chat-input .input-group {
+      max-width: 900px;
+      width: 100%;
+      border-radius: 25px;
+      overflow: hidden;
+      background-color: #3e3f4b;
+      align-items: center;
+    }
+    /* We use a textarea for "long text section" */
+    .chat-input textarea {
+      border: none;
+      background: transparent;
+      color: #fff;
+      padding: 12px 15px;
+      resize: none;
+      width: 100%;
+      outline: none;
+      font-size: 0.95rem;
+      height: 50px; /* Adjust to taste */
+    }
+    .chat-input textarea::placeholder {
+      color: #b2b2b2;
+    }
+    .chat-input button {
+      border: none;
+      background-color: #0b57d0;
+      color: #fff;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-left: 1px solid #565869;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chat-input button:hover {
+      background-color: #0a4cb8;
+    }
 
-        /* Responsive behavior */
-        @media (max-width: 768px) {
-            #user-query,
-            #send-btn {
-                width: 100%;
-                border-radius: 5px;
-                margin: 5px 0;
-            }
-        }
-    </style>
+    /* Responsive behavior */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none; /* Hide or convert to toggle on smaller screens */
+      }
+      .chat-input .input-group {
+        max-width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Chat Container -->
-    <div class="chat-container">
-        <h3 class="text-center">Chat with Medical Assistant</h3>
-        
-        <!-- Chat History -->
-        <div id="chat-history" class="chat-history">
-            <!-- Messages dynamically populate here -->
-        </div>
-
-        <!-- Input Area -->
-        <div class="input-group">
-            <input type="text" id="user-query" placeholder="Type your message here...">
-            <button id="send-btn">Send</button>
-        </div>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>ChatGPT UI</h2>
+      </div>
+      <button class="new-chat-btn">
+        <i class="bi bi-plus-lg"></i> New Chat
+      </button>
+      <button class="sidebar-item">Example Chat 1</button>
+      <button class="sidebar-item">Example Chat 2</button>
+      <button class="sidebar-item">Example Chat 3</button>
+      <!-- Additional sidebar items as needed -->
     </div>
 
-    <script>
-        const sendButton = document.getElementById('send-btn');
-        const userQueryInput = document.getElementById('user-query');
-        const chatHistory = document.getElementById('chat-history');
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <!-- Prompt Bar (prewritten prompt chips) -->
+      <div class="prompt-bar">
+        <div class="prompt-chip" data-prompt="What is cough?">What is cough?</div>
+        <div class="prompt-chip" data-prompt="What causes high blood pressure?">What causes high blood pressure?</div>
+        <div class="prompt-chip" data-prompt="Symptoms of diabetes?">Symptoms of diabetes?</div>
+        <div class="prompt-chip" data-prompt="Medication side effects">Medication side effects</div>
+      </div>
 
-        // Handle sending messages
-        sendButton.addEventListener('click', async () => {
-            const userQuery = userQueryInput.value.trim();
-            if (!userQuery) return;
+      <!-- Scrollable messages -->
+      <div id="chat-messages" class="chat-messages">
+        <!-- Example bot message on page load -->
+        <div class="message-container bot">
+          <div class="message-avatar">
+            <img src="https://placehold.co/40x40?text=B" alt="Bot Avatar"/>
+          </div>
+          <div class="message-bubble">
+            Hello! I’m your Medical Assistant. How can I help you today?
+          </div>
+        </div>
+      </div>
 
-            // Display user message
-            const userMessage = document.createElement('div');
-            userMessage.className = 'user-message';
-            userMessage.textContent = `You: ${userQuery}`;
-            chatHistory.appendChild(userMessage);
+      <!-- Input area -->
+      <div class="chat-input">
+        <div class="input-group">
+          <textarea
+            id="user-query"
+            rows="1"
+            placeholder="Type your message here..."
+          ></textarea>
+          <button id="send-btn">
+            <i class="bi bi-search"></i>
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            // Clear user input field
-            userQueryInput.value = '';
+  <!-- Bootstrap JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoH5jCFJfQOFeC8xS2GoyX1E0xLy0fY4Rl6e8r9b2e1UQw/"
+    crossorigin="anonymous">
+  </script>
 
-            try {
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ user_query: userQuery }),
-                });
+  <script>
+    const sendButton = document.getElementById('send-btn');
+    const userQueryInput = document.getElementById('user-query');
+    const chatMessages = document.getElementById('chat-messages');
+    const promptChips = document.querySelectorAll('.prompt-chip');
 
-                if (response.ok) {
-                    const data = await response.json();
+    // Utility function to create a message bubble
+    function createMessageBubble(text, sender = 'bot') {
+      const containerDiv = document.createElement('div');
+      containerDiv.classList.add('message-container', sender);
 
-                    // Display bot response
-                    const botMessage = document.createElement('div');
-                    botMessage.className = 'bot-message';
-                    botMessage.textContent = `Bot: ${data.answer}`;
-                    chatHistory.appendChild(botMessage);
+      const avatarDiv = document.createElement('div');
+      avatarDiv.classList.add('message-avatar');
 
-                    // Scroll to the bottom
-                    chatHistory.scrollTop = chatHistory.scrollHeight;
-                } else {
-                    throw new Error('Failed to fetch server response');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'bot-message';
-                errorMessage.textContent = 'Bot: Sorry, something went wrong.';
-                chatHistory.appendChild(errorMessage);
-            }
+      // Dummy avatars: Replace with your own image or user avatar
+      const avatarImg = document.createElement('img');
+      if (sender === 'user') {
+        avatarImg.src = 'https://placehold.co/40x40?text=U';
+      } else {
+        avatarImg.src = 'https://placehold.co/40x40?text=B';
+      }
+      avatarDiv.appendChild(avatarImg);
+
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.classList.add('message-bubble');
+      bubbleDiv.textContent = text;
+
+      containerDiv.appendChild(avatarDiv);
+      containerDiv.appendChild(bubbleDiv);
+
+      return containerDiv;
+    }
+
+    // Function to add a message to the chat
+    function appendMessage(text, sender) {
+      const messageElem = createMessageBubble(text, sender);
+      chatMessages.appendChild(messageElem);
+      // Scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Send message logic
+    async function sendMessage() {
+      const userQuery = userQueryInput.value.trim();
+      if (!userQuery) return;
+
+      // Append user message
+      appendMessage(`You: ${userQuery}`, 'user');
+      userQueryInput.value = '';
+
+      try {
+        // Make request to your backend
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_query: userQuery })
         });
-    </script>
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        // Append bot response
+        appendMessage(`Bot: ${data.answer}`, 'bot');
+      } catch (err) {
+        console.error(err);
+        appendMessage('Bot: Sorry, something went wrong.', 'bot');
+      }
+    }
+
+    // Event listener for send button
+    sendButton.addEventListener('click', sendMessage);
+
+    // Allow Enter key to send
+    userQueryInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); // Prevent newline
+        sendMessage();
+      }
+    });
+
+    // Clicking a prompt chip auto-fills the textarea
+    promptChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const promptText = chip.getAttribute('data-prompt');
+        userQueryInput.value = promptText;
+        userQueryInput.focus();
+      });
+    });
+  </script>
 </body>
 </html>

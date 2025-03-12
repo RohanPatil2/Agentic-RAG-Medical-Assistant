@@ -66,7 +66,7 @@ Built an advanced medical assistant chatbot using a fine-tuned LLaMA-3.1-8B mode
    - Generate and store embeddings using the fine-tuned LLaMA 3.1 model.
    - Install Ollama and pull the model from Hugging Face:
      ```bash
-     ollama pull hf.co/sathvik123/llama3-ChatDoc
+     ollama pull hf.co/sRohanpatil02/llama3-ChatDoc
      ```
 
 4. **Run the Application**
